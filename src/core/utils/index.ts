@@ -1,3 +1,6 @@
+import fs from "fs";
+import { prisma } from "../services/prisma-client";
+
 export function pascalToCamel<T>(object: any): T {
   if (typeof object !== "object" || object === null) {
     return object;
@@ -12,6 +15,48 @@ export function pascalToCamel<T>(object: any): T {
     camelObject[camelKey] = pascalToCamel(value);
     return camelObject;
   }, {}) as T;
+}
+
+export function snakeToCamel<T>(obj: any): T {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => snakeToCamel(item)) as any;
+  }
+
+  return Object.keys(obj).reduce((acc: any, key) => {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()) as any;
+    const value = obj[key];
+    acc[camelKey] = snakeToCamel(value);
+    return acc;
+  }, {});
+}
+
+export async function populateSymbols() {
+  const jsonFileName = "synthetic_symbols.json";
+  const jsonString = fs.readFileSync(jsonFileName, "utf8");
+  const jsonData = JSON.parse(jsonString);
+
+  for (const item of jsonData) {
+    await prisma.activeSymbols.create({
+      data: {
+        description: item.description,
+        market: item.market,
+        symbol: item.symbol,
+        decimalValue: item.decimal,
+        name: item.name,
+        submarket: item.submarket,
+        marketDisplayName: item.marketDisplayName,
+        readableName: item.readableName,
+      },
+    });
+  }
+}
+
+export function snakeToCamelCase(str: string): string {
+  return str.replace(/(_\w)/g, (match) => match[1].toUpperCase());
 }
 
 export function hasChanges(oldObj: any, newObj: any): boolean {

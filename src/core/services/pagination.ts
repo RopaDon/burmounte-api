@@ -11,9 +11,9 @@ export interface PaginatedResult<T> {
 }
 
 export type PaginateOptions = { page?: number | string; limit?: number | string; searchTerm?: string; datePeriod?: string };
-export type PaginateFunction<M, U, K> = (model: any, args?: K, options?: PaginateOptions) => Promise<PaginatedResult<U>>;
+export type PaginateFunction<M, K> = (model: any, args?: K, options?: PaginateOptions) => Promise<PaginatedResult<M>>;
 
-export const paginator = <M, U, K>(defaultOptions: PaginateOptions, transformer: (item: M) => U | Promise<U>): PaginateFunction<M, U, K> => {
+export const paginator = <M, U, K>(defaultOptions: PaginateOptions, transformer?: (item: M) => U | Promise<U>): PaginateFunction<M, K> => {
   return async (model, args: any = { where: undefined, include: undefined }, options) => {
     const page = Number(options?.page || defaultOptions?.page) || 1;
     const perPage = Number(options?.limit || defaultOptions?.limit) || 10;
@@ -29,7 +29,11 @@ export const paginator = <M, U, K>(defaultOptions: PaginateOptions, transformer:
     ]);
     const lastPage = Math.ceil(total / perPage);
 
-    const transformedData = data.map(transformer);
+    let transformedData = data;
+
+    if (transformer) {
+      transformedData = data.map(transformer);
+    }
 
     return {
       items: transformedData,

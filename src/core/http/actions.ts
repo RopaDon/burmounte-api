@@ -1,47 +1,7 @@
 export default class Actions {
-  static Client = {
-    CREATED: "CLIENT_CREATED",
-    UPDATED: "CLIENT_UPDATED",
-    DELETED: "CLIENT_DELETED",
-    EXPORTED: "CLIENT_EXPORTED",
-  };
-
-  static Employee = {
-    CREATED: "EMPLOYEE_CREATED",
-    UPDATED: "EMPLOYEE_UPDATED",
-    DELETED: "EMPLOYEE_DELETED",
-  };
-
-  static Waitlist = {
-    CREATED: "WAITLIST_CREATED",
-    UPDATED: "WAITLIST_UPDATED",
-    DELETED: "WAITLIST_DELETED",
-  };
-
-  static Job = {
-    CREATED: "JOB_CREATED",
-    UPDATED: "JOB_UPDATED",
-    DELETED: "JOB_DELETED",
-  };
-  static JobApplication = {
-    SUBMITTED: "JOB_SUBMITTED",
-    UPDATED: "JOB_UPDATED",
-    DELETED: "JOB_DELETED",
-  };
-
-  static Industry = {
-    CREATED: "INDUSTRY_CREATED",
-    UPDATED: "INDUSTRY_UPDATED",
-    DELETED: "INDUSTRY_DELETED",
-  };
-
-  static Document = {
-    CREATED: "DOCUMENT_CREATED",
-    UPDATED: "DOCUMENT_UPDATED",
-    DELETED: "DOCUMENT_DELETED",
-  };
-
-  static Service = {
-    PARTNERSHIP_REQUESTED: "PARTNERSHIP_REQUESTED",
+  static WatchList = {
+    CREATED: "WATCHLIST_CREATED",
+    SYMBOL_ADDED: "SYMBOL_ADDED",
+    DELETED: "WATCHLIST_DELETED",
   };
 }

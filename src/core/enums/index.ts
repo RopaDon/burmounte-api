@@ -1,3 +1,9 @@
+export enum SymbolQueryType {
+  Forex = "forex",
+  Derived = "derived",
+  Crypto = "cryptocurrencies",
+}
+
 export enum AuditActions {
   CREATE = "CREATE",
   DELETE = "DELETE",

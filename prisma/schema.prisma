@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ActiveSymbols {
+  id                Int               @id @default(autoincrement())
+  description       String?           @db.Text
+  symbol            String            @unique()
+  decimalValue      Int
+  market            String
+  name              String
+  submarket         String
+  marketDisplayName String
+  readableName      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now())
+  watchlistSymbol   WatchlistSymbol[]
+  TrendingSymbol    TrendingSymbol[]
+}
+
+model PayoutCurrency {
+  id           Int      @id @default(autoincrement())
+  description  String?  @db.Text
+  currency     String
+  readableName String
+  market       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+}
+
+model Notifications {
+  id          Int      @id @default(autoincrement())
+  description String   @db.Text
+  title       String
+  userId      Int
+  type        String?
+  isRead      Boolean  @default(false)
+  actionLink  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
+
+model Watchlist {
+  id            Int               @id @default(autoincrement())
+  userId        Int
+  title         String
+  description   String?
+  isPublic      Boolean?
+  tags          String?
+  favoriteCount Int?
+  viewCount     Int?
+  lastAccessed  DateTime?
+  symbols       WatchlistSymbol[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @default(now())
+}
+
+model WatchlistSymbol {
+  id                   Int           @id @default(autoincrement())
+  symbol               String        @unique
+  name                 String?
+  description          String?
+  addedOn              DateTime?     @default(now())
+  rank                 Int?
+  isFavorite           Boolean?
+  watchlistId          Int?
+  watchlist            Watchlist?    @relation(fields: [watchlistId], references: [id])
+  associatedSymbolData ActiveSymbols @relation(fields: [symbol], references: [symbol])
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @default(now())
+}
+
+model User {
+  id                Int      @id @default(autoincrement())
+  email             String?
+  notificationToken String?  @db.LongText
+  stripeCustomerId  String?
+  derivUserId       Int?
+  fullName          String?
+  preferredLanguage String?
+  country           String?
+  profilePicture    String?
+  accountType       String?
+  accountCategory   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+}
+
+model AcceptedTransaction {
+  id         Int                 @id @default(autoincrement())
+  name       String
+  identifier String
+  methods    TransactionMethod[] // Define the many-to-many relationship
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @default(now())
+}
+
+model TransactionMethod {
+  id                   Int                   @id @default(autoincrement())
+  depositActionUrl     String?
+  withdrawActionUrl    String?
+  transferActionUrl    String?
+  hasUrlAction         Boolean               @default(false)
+  acceptedTransactions AcceptedTransaction[] // Define the many-to-many relationship
+  title                String
+  description          String
+  commission           Int
+  restrictions         String?
+  estimatedTime        String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @default(now())
+  DepositRequest       DepositRequest[]
+  WithdrawalRequest    WithdrawalRequest[]
+}
+
+model Subscriptions {
+  id               Int       @id @default(autoincrement())
+  subscriptionId   String
+  userId           Int
+  stripeCustomerId String
+  planId           String
+  status           String
+  currentPeriodEnd DateTime?
+  startDate        DateTime
+  endDate          DateTime
+  price            Float?
+  currency         String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now())
+}
+
+model TrendingSymbol {
+  id               Int           @id @default(autoincrement())
+  symbol           String
+  associatedSymbol ActiveSymbols @relation(fields: [symbol], references: [symbol])
+  tradedBy         Int
+  tradedOn         DateTime      @default(now())
+}
+
+model DepositRequest {
+  id                  Int               @id @default(autoincrement())
+  userId              Int
+  amount              Float
+  transactionMethodId Int
+  currency            String
+  status              String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @default(now())
+  type                TransactionMethod @relation(fields: [transactionMethodId], references: [id])
+}
+
+model WithdrawalRequest {
+  id                  Int               @id @default(autoincrement())
+  userId              Int
+  transactionMethodId Int
+  amount              Float
+  currency            String
+  status              String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @default(now())
+  type                TransactionMethod @relation(fields: [transactionMethodId], references: [id])
+}
+
+model Roles {
+  id          Int      @unique
+  name        String
+  description String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  admin Admin[]
+}
+
+model AuditTrail {
+  id        Int      @id @default(autoincrement())
+  tableName String
+  recordId  Int
+  action    String
+  timestamp DateTime
+  adminId   Int?
+  oldValue  String?
+  newValue  String?
+
+  user Admin? @relation(fields: [adminId], references: [id])
+}
+
+model Admin {
+  id          Int       @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  username    String    @unique
+  password    String
+  email       String    @unique
+  phoneNumber String?
+  profilePic  String?
+  isDeleted   Boolean   @default(false)
+  role        Roles     @relation(fields: [roleId], references: [id])
+  lastLogin   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  permissions AdminPermission[]
+  auditTrail  AuditTrail[]
+  roleId      Int
+}
+
+model Permission {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String @db.Text
+
+  modifiedOn DateTime?
+  createdOn  DateTime  @default(now())
+
+  adminPermission AdminPermission[]
+}
+
+model AdminPermission {
+  id           Int      @id @default(autoincrement())
+  adminId      Int
+  permissionId Int
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+
+  permission Permission? @relation(fields: [permissionId], references: [id])
+  admin      Admin?      @relation(fields: [adminId], references: [id])
+}

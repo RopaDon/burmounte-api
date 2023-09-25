@@ -9,7 +9,7 @@ import "reflect-metadata";
 export class LoggerService {
   private logger: winston.Logger;
 
-  constructor() {
+  constructor(className: string) {
     this.logger = winston.createLogger({
       format: winston.format.json(),
       transports: [
@@ -26,9 +26,9 @@ export class LoggerService {
             }),
             winston.format.printf(({ level, message, timestamp, stack }) => {
               if (level === "error") {
-                return `${timestamp} [${level}]: ${stack || message}`;
+                return `${className} ${timestamp} [${level}]: (${className}) ${stack || message}`;
               }
-              return `${timestamp} [${level}]: ${message}`;
+              return `${timestamp} [${level}]: (${className}) ${message}`;
             })
           ),
         }),

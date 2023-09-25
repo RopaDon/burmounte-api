@@ -8,9 +8,18 @@ import { container } from "./core/di/dependency-injection";
 import { routingControllersToSpec } from "routing-controllers-openapi";
 import AuthorizationMiddleware from "./core/http/middlewares/authorization-middleware";
 import { createExpressServer, getMetadataArgsStorage, useContainer } from "routing-controllers";
+import { DerivAPI } from "./core/services/deriv-api";
 
-async function bootstrap() {
-  const app = createExpressServer({
+async function _bootstrap() {
+  const app = _configureExpressServer();
+
+  _configureServices(app);
+
+  //_configureSwagger(app);
+}
+
+function _configureExpressServer() {
+  return createExpressServer({
     cors: {
       origin: "*",
     },
@@ -24,15 +33,13 @@ async function bootstrap() {
     interceptors: [path.join(__dirname, "core/http/interceptors/**/*.{js,ts}")],
     controllers: [path.join(__dirname, "presentation/controllers/**/*.{js,ts}")],
   }) as express.Express;
-
-  //  configureSwagger(app);
-
-  configureServices(app);
 }
 
-function configureServices(app: express.Express) {
+async function _configureServices(app: express.Express) {
   const port = process.env.PORT || 5000;
 
+  const derivAPI = new DerivAPI();
+  await derivAPI.establishApiConnection();
   // Set up the container for routing-controllers
   useContainer(container, { fallback: true, fallbackOnErrors: true });
 
@@ -43,7 +50,7 @@ function configureServices(app: express.Express) {
   });
 }
 
-function configureSwagger(app: express.Express) {
+function _configureSwagger(app: express.Express) {
   const options: swaggerJsdoc.Options = {
     definition: {
       openapi: "3.0.0",
@@ -65,4 +72,4 @@ function configureSwagger(app: express.Express) {
   app.use("/v1/swagger", swaggerUi.serve, swaggerUi.setup(specs));
 }
 
-bootstrap();
+_bootstrap();
