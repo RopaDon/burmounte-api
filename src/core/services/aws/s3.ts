@@ -35,7 +35,7 @@ class S3BucketService {
       return Location;
     } catch (error) {
       this.logger.error("An error occured while uploading a your file to S3", error);
-      throw new ServiceHubException(ExceptionTypes.S3_BUCKET_ERROR, HttpStatusCodes.BAD_REQUEST, "An error occured while uploading a your file to S3");
+      throw new ServiceHubException(HttpStatusCodes.BAD_REQUEST, "An error occured while uploading a your file to S3");
     }
   }
 
@@ -52,7 +52,7 @@ class S3BucketService {
       return signedUrl;
     } catch (error) {
       this.logger.error("An error occured while getting your signed url", error);
-      throw new ServiceHubException(ExceptionTypes.S3_BUCKET_ERROR, HttpStatusCodes.BAD_REQUEST, "An error occured while getting your signed url");
+      throw new ServiceHubException(HttpStatusCodes.BAD_REQUEST, "An error occured while getting your signed url");
     }
   }
 }
