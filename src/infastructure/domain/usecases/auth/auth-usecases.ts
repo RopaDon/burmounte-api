@@ -4,21 +4,25 @@ import { User } from "@prisma/client";
 import { inject, injectable } from "inversify";
 import { Token } from "../../../../core/types";
 import StripeUseCases from "../stripe/stripe-usecases";
+import DerivService from "../../../../core/services/deriv-api";
 import { prisma } from "../../../../core/services/prisma-client";
 import { HttpStatusCodes } from "../../../../core/http/status-codes";
 import { pascalToCamel, snakeToCamel } from "../../../../core/utils";
 import { AuthorizeUserDTO } from "../../dtos/request/authorize-user-dto";
 import { LoggerService } from "../../../../core/services/logger-service";
 import { ConfigService } from "../../../../core/services/config-service";
-import { derivAPI } from "../../../../core/services/deriv-api-connection";
+import ServiceHubExceptionDelegate from "../../../../core/exceptions/handler";
 import ServiceHubException from "../../../../core/exceptions/service-hub-exception";
 import AuthenticateAdminDTO from "../../dtos/request/admin/authenticate-admin-dto";
-import ServiceHubExceptionDelegate from "../../../../core/exceptions/handler";
 
 @injectable()
 export default class AuthUseCases {
   private logger: LoggerService;
-  constructor(@inject(ConfigService) private configService: ConfigService, @inject(StripeUseCases) private stripeUseCases: StripeUseCases) {
+  constructor(
+    @inject(DerivService) private derivService: DerivService,
+    @inject(ConfigService) private configService: ConfigService,
+    @inject(StripeUseCases) private stripeUseCases: StripeUseCases
+  ) {
     this.logger = new LoggerService(this.constructor.name);
   }
 
@@ -33,7 +37,7 @@ export default class AuthUseCases {
         derivUserId: true,
       };
 
-      const derivUser = await derivAPI.authorize(derivToken);
+      const derivUser = await this.derivService.authorize(derivToken);
 
       let burmounteUser = await prisma.user.findFirst({
         where: { email: derivUser.email },
@@ -47,7 +51,7 @@ export default class AuthUseCases {
           stripeCustomerId,
           notificationToken,
           email: derivUser.authorize.email,
-          derivUserId: derivUser.authorize.user_id,
+          derivUserId: derivUser.authorize.userId,
         };
 
         burmounteUser = (await prisma.user.create({
@@ -58,7 +62,7 @@ export default class AuthUseCases {
 
       const user = {
         burmounte: burmounteUser,
-        deriv: snakeToCamel(derivUser.authorize),
+        deriv: derivUser.authorize,
       };
 
       const accessToken = sign(user, this.configService.get("ACCESS_TOKEN_KEY"), { expiresIn: "999999999y" });

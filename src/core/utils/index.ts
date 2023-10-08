@@ -1,5 +1,6 @@
 import fs from "fs";
 import { prisma } from "../services/prisma-client";
+import { derivAPI } from "../services/deriv-api-connection";
 
 export function pascalToCamel<T>(object: any): T {
   if (typeof object !== "object" || object === null) {
@@ -35,22 +36,13 @@ export function snakeToCamel<T>(obj: any): T {
 }
 
 export async function populateSymbols() {
-  const jsonFileName = "synthetic_symbols.json";
+  const jsonFileName = "updated_data.json";
   const jsonString = fs.readFileSync(jsonFileName, "utf8");
   const jsonData = JSON.parse(jsonString);
 
   for (const item of jsonData) {
-    await prisma.activeSymbols.create({
-      data: {
-        description: item.description,
-        market: item.market,
-        symbol: item.symbol,
-        decimalValue: item.decimal,
-        name: item.name,
-        submarket: item.submarket,
-        marketDisplayName: item.marketDisplayName,
-        readableName: item.readableName,
-      },
+    await prisma.activeSymbol.create({
+      data: item,
     });
   }
 }
@@ -66,6 +58,57 @@ export function hasChanges(oldObj: any, newObj: any): boolean {
     }
   }
   return false;
+}
+
+export async function updateJSONWithActiveSymbols(activeSymbols: any) {
+  const filePath = "synthetic_symbols.json"; // Replace with your JSON file path
+
+  try {
+    const jsonData = JSON.parse(fs.readFileSync(filePath, "utf8"));
+
+    // Modify the JSON data based on active symbols
+    const updatedData = jsonData.map((jsonItem: any) => {
+      const matchingSymbol = activeSymbols.find((activeSymbol: any) => activeSymbol.symbol === jsonItem.symbol);
+      if (matchingSymbol) {
+        // Convert numeric values to boolean
+        const exchangeIsOpen = matchingSymbol.exchangeIsOpen === 1;
+        const isTradingSuspended = matchingSymbol.isTradingSuspended === 1;
+        const allowForwardStarting = matchingSymbol.allowForwardStarting === 1;
+
+        // Create a modified JSON object with the desired fields
+        return {
+          id: jsonItem.id,
+          allowForwardStarting: matchingSymbol.allowForwardStarting === 1 ? true : false,
+          delayAmount: matchingSymbol.delayAmount,
+          displayName: matchingSymbol.displayName,
+          exchangeIsOpen: matchingSymbol.exchangeIsOpen === 1 ? true : false,
+          exchangeName: matchingSymbol.exchangeName,
+          intradayIntervalMinutes: matchingSymbol.intradayIntervalMinutes,
+          isTradingSuspended: matchingSymbol.isTradingSuspended === 1 ? true : false,
+          market: matchingSymbol.market,
+          marketDisplayName: matchingSymbol.marketDisplayName,
+          pip: matchingSymbol.pip,
+          quotedCurrencySymbol: matchingSymbol.quotedCurrencySymbol,
+          spot: matchingSymbol.spot,
+          spotAge: matchingSymbol.spotAge,
+          spotTime: matchingSymbol.spotTime,
+          submarket: matchingSymbol.submarket,
+          submarketDisplayName: matchingSymbol.submarketDisplayName,
+          readableName: jsonItem.readableName,
+          description: jsonItem.description,
+          symbol: jsonItem.symbol,
+          symbolType: matchingSymbol.symbolType,
+        };
+      }
+      return jsonItem; // If no matching symbol found, keep the original JSON item
+    });
+
+    // Write the updated data back to the JSON file
+    fs.writeFileSync("updated_data.json", JSON.stringify(updatedData, null, 2), "utf8");
+    console.log("JSON data has been written to the file successfully.");
+  } catch (error) {
+    console.error("Error reading or writing JSON data:", error);
+  }
 }
 
 export function getDateByTimeString(datePeriod: string) {

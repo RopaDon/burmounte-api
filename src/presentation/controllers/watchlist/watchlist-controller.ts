@@ -16,6 +16,10 @@ export class WatchListController {
   async getUserWatchlist(@Param("userId") userId: number) {
     return await this.watchListUseCases.getUserWatchlist(userId);
   }
+  @Get(Routes.Watchlist.GetUserWatchlistSymbols)
+  async getUserWatchlistSymbols(@Param("watchlistId") watchlistId: number) {
+    return await this.watchListUseCases.getUserWatchlistSymbols(watchlistId);
+  }
   @Post(Routes.Watchlist.CreateUserWatchlist)
   async createWatchlist(@Body() createWatchListDTO: CreateWatchListDTO) {
     return await this.watchListUseCases.createWatchList(createWatchListDTO);

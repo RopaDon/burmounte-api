@@ -1,9 +1,10 @@
 export default class Routes {
   static ActiveSymbols = {
-    GetSymbols: "",
     Search: "/search",
+    GetActiveSymbols: "",
+    GetActiveSymbol: "/:symbol",
     GetTrendingSymbols: "/trending",
-    GetSymbolMetadata: "/metadata",
+    GetActiveSymbolsForLanding: "/landing",
   };
   static Currencies = {
     Get: "",
@@ -32,6 +33,7 @@ export default class Routes {
     AddItemToWatchList: "/add",
     GetUserWatchlist: "/:userId",
     DeleteUserWatchlist: "/:watchlistId",
+    GetUserWatchlistSymbols: "/symbols/:watchlistId",
     RemoveItemFromWatchList: "/:watchlistId/remove/:symbol",
   };
 }

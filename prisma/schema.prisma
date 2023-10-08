@@ -7,20 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ActiveSymbols {
-  id                Int               @id @default(autoincrement())
-  description       String?           @db.Text
-  symbol            String            @unique()
-  decimalValue      Int
-  market            String
-  name              String
-  submarket         String
-  marketDisplayName String
-  readableName      String?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @default(now())
-  watchlistSymbol   WatchlistSymbol[]
-  TrendingSymbol    TrendingSymbol[]
+model ActiveSymbol {
+  id                      Int               @id @default(autoincrement())
+  allowForwardStarting    Boolean?
+  delayAmount             Int?
+  displayName             String?
+  exchangeIsOpen          Boolean?
+  exchangeName            String?
+  intradayIntervalMinutes Int?
+  isTradingSuspended      Boolean?
+  market                  String
+  marketDisplayName       String?
+  pip                     Float?
+  quotedCurrencySymbol    String?
+  spot                    Float?
+  spotAge                 String?
+  spotTime                String?
+  submarket               String?
+  submarketDisplayName    String?
+  readableName            String?
+  description             String?           @db.LongText
+  symbol                  String            @unique()
+  symbolType              String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @default(now())
+  watchlistSymbols        WatchlistSymbol[]
+  trendingSymbols         TrendingSymbol[]
 }
 
 model PayoutCurrency {
@@ -61,18 +73,18 @@ model Watchlist {
 }
 
 model WatchlistSymbol {
-  id                   Int           @id @default(autoincrement())
-  symbol               String        @unique
+  id                   Int          @id @default(autoincrement())
+  symbol               String       @unique
   name                 String?
   description          String?
-  addedOn              DateTime?     @default(now())
+  addedOn              DateTime?    @default(now())
   rank                 Int?
   isFavorite           Boolean?
   watchlistId          Int?
-  watchlist            Watchlist?    @relation(fields: [watchlistId], references: [id])
-  associatedSymbolData ActiveSymbols @relation(fields: [symbol], references: [symbol])
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @default(now())
+  watchlist            Watchlist?   @relation(fields: [watchlistId], references: [id])
+  associatedSymbolData ActiveSymbol @relation(fields: [symbol], references: [symbol])
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @default(now())
 }
 
 model User {
@@ -92,30 +104,41 @@ model User {
 }
 
 model AcceptedTransaction {
-  id         Int                 @id @default(autoincrement())
-  name       String
-  identifier String
-  methods    TransactionMethod[] // Define the many-to-many relationship
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @default(now())
+  id                 Int                                      @id @default(autoincrement())
+  name               String
+  identifier         String
+  createdAt          DateTime                                 @default(now())
+  updatedAt          DateTime                                 @default(now())
+  transactionMethods AcceptedTransactionOnTransactionMethod[]
 }
 
 model TransactionMethod {
-  id                   Int                   @id @default(autoincrement())
+  id                   Int                                      @id @default(autoincrement())
   depositActionUrl     String?
   withdrawActionUrl    String?
   transferActionUrl    String?
-  hasUrlAction         Boolean               @default(false)
-  acceptedTransactions AcceptedTransaction[] // Define the many-to-many relationship
+  displayImage         String?                                  @db.Text
+  hasUrlAction         Boolean                                  @default(false)
   title                String
   description          String
   commission           Int
   restrictions         String?
   estimatedTime        String
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @default(now())
-  DepositRequest       DepositRequest[]
-  WithdrawalRequest    WithdrawalRequest[]
+  createdAt            DateTime                                 @default(now())
+  updatedAt            DateTime                                 @default(now())
+  depositRequest       Deposit[]
+  withdrawalRequest    Withdrawal[]
+  acceptedTransactions AcceptedTransactionOnTransactionMethod[]
+}
+
+model AcceptedTransactionOnTransactionMethod {
+  acceptedTransaction AcceptedTransaction @relation(fields: [acceptedTransactionId], references: [id])
+  transactionMethod   TransactionMethod   @relation(fields: [transactionMethodId], references: [id])
+
+  acceptedTransactionId Int
+  transactionMethodId   Int
+
+  @@id([acceptedTransactionId, transactionMethodId])
 }
 
 model Subscriptions {
@@ -135,14 +158,14 @@ model Subscriptions {
 }
 
 model TrendingSymbol {
-  id               Int           @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   symbol           String
-  associatedSymbol ActiveSymbols @relation(fields: [symbol], references: [symbol])
+  associatedSymbol ActiveSymbol @relation(fields: [symbol], references: [symbol])
   tradedBy         Int
-  tradedOn         DateTime      @default(now())
+  tradedOn         DateTime     @default(now())
 }
 
-model DepositRequest {
+model Deposit {
   id                  Int               @id @default(autoincrement())
   userId              Int
   amount              Float
@@ -154,7 +177,7 @@ model DepositRequest {
   type                TransactionMethod @relation(fields: [transactionMethodId], references: [id])
 }
 
-model WithdrawalRequest {
+model Withdrawal {
   id                  Int               @id @default(autoincrement())
   userId              Int
   transactionMethodId Int
@@ -167,7 +190,7 @@ model WithdrawalRequest {
 }
 
 model Roles {
-  id          Int      @unique
+  id          Int      @id @default(autoincrement())
   name        String
   description String   @db.Text
   createdAt   DateTime @default(now())

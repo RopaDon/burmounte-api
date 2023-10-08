@@ -1,6 +1,5 @@
 // inversify.config.ts
 import { Container } from "inversify";
-import { DerivAPI } from "../services/deriv-api";
 import { NewsApi } from "../services/news-service";
 import { EmailService } from "../services/email-service";
 import { LoggerService } from "../services/logger-service";
@@ -23,6 +22,7 @@ import { WatchListController } from "../../presentation/controllers/watchlist/wa
 import SubscriptionUseCases from "../../infastructure/domain/usecases/subscription/subscription-usecases";
 import { SusbcriptionController } from "../../presentation/controllers/subscription/subscription-controller";
 import TrendingSymbolsUseCases from "../../infastructure/domain/usecases/trending-symbols/trending-symbols-usecases";
+import DerivService from "../services/deriv-api";
 
 const container = new Container();
 
@@ -33,12 +33,12 @@ container.bind<EmailService>(EmailService).toSelf();
 container.bind<AuthUseCases>(AuthUseCases).toSelf();
 container.bind<AuthController>(AuthController).toSelf();
 
+container.bind<DerivService>(DerivService).toSelf();
+
 container.bind<NewsUseCases>(NewsUseCases).toSelf();
 container.bind<NewsController>(NewsController).toSelf();
 
 container.bind<StripeUseCases>(StripeUseCases).toSelf();
-
-container.bind<DerivAPI>(DerivAPI).toSelf().inSingletonScope();
 
 container.bind<CurrencyUseCases>(CurrencyUseCases).toSelf();
 container.bind<CurrencyController>(CurrencyController).toSelf();

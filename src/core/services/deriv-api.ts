@@ -1,36 +1,29 @@
-import "reflect-metadata";
-
-import WebSocket from "ws";
 import { injectable } from "inversify";
+import { snakeToCamel } from "../utils";
+import { derivAPI } from "./deriv-api-connection";
 //@ts-ignore
-import DerivAPIBasic from "@deriv/deriv-api/dist/DerivAPIBasic.js";
+import DerivAPI from "@deriv/deriv-api/dist/DerivAPI";
 
 @injectable()
-export class DerivAPI {
-  private api: DerivAPIBasic | null = null;
-
-  constructor() {}
-
-  public async establishApiConnection(): Promise<DerivAPIBasic> {
-    return new Promise<DerivAPIBasic>((resolve, reject) => {
-      const connection = new WebSocket(process.env.DERIV_API!);
-
-      connection.addEventListener("open", () => {
-        console.log("WebSocket connection established successfully");
-        const api = new DerivAPIBasic({ connection });
-        resolve(api);
-      });
-
-      connection.addEventListener("error", (error) => {
-        console.error("WebSocket error:", error);
-        reject(error);
-      });
-    });
+export default class DerivService {
+  private derivAPI: DerivAPI;
+  constructor() {
+    this.derivAPI = derivAPI.getAPI().basic;
   }
-  public getApi(): DerivAPIBasic {
-    if (!this.api) {
-      throw new Error("WebSocket connection not yet established.");
-    }
-    return this.api;
+
+  public async authorize(token: string): Promise<any> {
+    let user = await this.derivAPI.authorize(token);
+
+    const mappedUser = snakeToCamel(user);
+
+    return mappedUser;
+  }
+
+  public async getActiveSymbols(type: string): Promise<any[]> {
+    let allSymbols = await this.derivAPI.activeSymbols({ active_symbols: type });
+
+    const activeSymbols = allSymbols.active_symbols.map((item: any) => snakeToCamel(item));
+
+    return activeSymbols;
   }
 }

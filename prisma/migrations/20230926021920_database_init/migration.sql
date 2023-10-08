@@ -1,67 +1,33 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE `ActiveSymbols` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `description` TEXT NULL,
+    `symbol` VARCHAR(191) NOT NULL,
+    `decimalValue` INTEGER NOT NULL,
+    `market` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `submarket` VARCHAR(191) NOT NULL,
+    `marketDisplayName` VARCHAR(191) NOT NULL,
+    `readableName` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-  - You are about to drop the column `createdOn` on the `ActiveSymbols` table. All the data in the column will be lost.
-  - You are about to drop the column `modifiedOn` on the `ActiveSymbols` table. All the data in the column will be lost.
-  - You are about to drop the column `createdOn` on the `PayoutCurrency` table. All the data in the column will be lost.
-  - You are about to drop the column `modifiedOn` on the `PayoutCurrency` table. All the data in the column will be lost.
-  - You are about to drop the column `acceptedTransactions` on the `TransactionMethods` table. All the data in the column will be lost.
-  - You are about to drop the column `actionUrl` on the `TransactionMethods` table. All the data in the column will be lost.
-  - You are about to drop the column `createdOn` on the `TransactionMethods` table. All the data in the column will be lost.
-  - You are about to drop the column `modifiedOn` on the `TransactionMethods` table. All the data in the column will be lost.
-  - You are about to drop the column `createdOn` on the `Watchlist` table. All the data in the column will be lost.
-  - You are about to drop the column `modifiedOn` on the `Watchlist` table. All the data in the column will be lost.
-  - You are about to drop the column `symbol` on the `Watchlist` table. All the data in the column will be lost.
-  - You are about to drop the `Notification` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-  - A unique constraint covering the columns `[symbol]` on the table `ActiveSymbols` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `estimatedTime` to the `TransactionMethods` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `title` to the `Watchlist` table without a default value. This is not possible if the table is not empty.
+    UNIQUE INDEX `ActiveSymbols_symbol_key`(`symbol`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-*/
--- AlterTable
-ALTER TABLE `ActiveSymbols` DROP COLUMN `createdOn`,
-    DROP COLUMN `modifiedOn`,
-    ADD COLUMN `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
+-- CreateTable
+CREATE TABLE `PayoutCurrency` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `description` TEXT NULL,
+    `currency` VARCHAR(191) NOT NULL,
+    `readableName` VARCHAR(191) NOT NULL,
+    `market` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
--- AlterTable
-ALTER TABLE `PayoutCurrency` DROP COLUMN `createdOn`,
-    DROP COLUMN `modifiedOn`,
-    ADD COLUMN `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
-
--- AlterTable
-ALTER TABLE `TransactionMethods` DROP COLUMN `acceptedTransactions`,
-    DROP COLUMN `actionUrl`,
-    DROP COLUMN `createdOn`,
-    DROP COLUMN `modifiedOn`,
-    ADD COLUMN `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `depositActionUrl` VARCHAR(191) NULL,
-    ADD COLUMN `estimatedTime` VARCHAR(191) NOT NULL,
-    ADD COLUMN `transferActionUrl` VARCHAR(191) NULL,
-    ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `withdrawActionUrl` VARCHAR(191) NULL;
-
--- AlterTable
-ALTER TABLE `Watchlist` DROP COLUMN `createdOn`,
-    DROP COLUMN `modifiedOn`,
-    DROP COLUMN `symbol`,
-    ADD COLUMN `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `description` VARCHAR(191) NULL,
-    ADD COLUMN `favoriteCount` INTEGER NULL,
-    ADD COLUMN `isPublic` BOOLEAN NULL,
-    ADD COLUMN `lastAccessed` DATETIME(3) NULL,
-    ADD COLUMN `tags` VARCHAR(191) NULL,
-    ADD COLUMN `title` VARCHAR(191) NOT NULL,
-    ADD COLUMN `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `viewCount` INTEGER NULL;
-
--- DropTable
-DROP TABLE `Notification`;
-
--- DropTable
-DROP TABLE `User`;
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Notifications` (
@@ -79,15 +45,16 @@ CREATE TABLE `Notifications` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `WatchlistSymbol` (
+CREATE TABLE `Watchlist` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `symbol` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NULL,
+    `userId` INTEGER NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
-    `addedOn` DATETIME(3) NULL,
-    `rank` INTEGER NULL,
-    `isFavorite` BOOLEAN NULL,
-    `watchlistId` INTEGER NULL,
+    `isPublic` BOOLEAN NULL,
+    `tags` VARCHAR(191) NULL,
+    `favoriteCount` INTEGER NULL,
+    `viewCount` INTEGER NULL,
+    `lastAccessed` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -95,10 +62,27 @@ CREATE TABLE `WatchlistSymbol` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Users` (
+CREATE TABLE `WatchlistSymbol` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `symbol` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NULL,
+    `description` VARCHAR(191) NULL,
+    `addedOn` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `rank` INTEGER NULL,
+    `isFavorite` BOOLEAN NULL,
+    `watchlistId` INTEGER NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `WatchlistSymbol_symbol_key`(`symbol`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `User` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(191) NULL,
-    `notificationToken` VARCHAR(191) NULL,
+    `notificationToken` LONGTEXT NULL,
     `stripeCustomerId` VARCHAR(191) NULL,
     `derivUserId` INTEGER NULL,
     `fullName` VARCHAR(191) NULL,
@@ -117,7 +101,7 @@ CREATE TABLE `Users` (
 CREATE TABLE `AcceptedTransaction` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `transactionMethodsId` INTEGER NOT NULL,
+    `identifier` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -125,9 +109,36 @@ CREATE TABLE `AcceptedTransaction` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `TransactionMethod` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `depositActionUrl` VARCHAR(191) NULL,
+    `withdrawActionUrl` VARCHAR(191) NULL,
+    `transferActionUrl` VARCHAR(191) NULL,
+    `hasUrlAction` BOOLEAN NOT NULL DEFAULT false,
+    `title` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NOT NULL,
+    `commission` INTEGER NOT NULL,
+    `restrictions` VARCHAR(191) NULL,
+    `estimatedTime` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AcceptedTransactionOnTransactionMethod` (
+    `acceptedTransactionId` INTEGER NOT NULL,
+    `transactionMethodId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`acceptedTransactionId`, `transactionMethodId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Subscriptions` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `subscriptionId` VARCHAR(191) NOT NULL,
+    `userId` INTEGER NOT NULL,
     `stripeCustomerId` VARCHAR(191) NOT NULL,
     `planId` VARCHAR(191) NOT NULL,
     `status` VARCHAR(191) NOT NULL,
@@ -182,13 +193,13 @@ CREATE TABLE `WithdrawalRequest` (
 
 -- CreateTable
 CREATE TABLE `Roles` (
-    `id` INTEGER NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` TEXT NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `Roles_id_key`(`id`)
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -249,9 +260,6 @@ CREATE TABLE `AdminPermission` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- CreateIndex
-CREATE UNIQUE INDEX `ActiveSymbols_symbol_key` ON `ActiveSymbols`(`symbol`);
-
 -- AddForeignKey
 ALTER TABLE `WatchlistSymbol` ADD CONSTRAINT `WatchlistSymbol_watchlistId_fkey` FOREIGN KEY (`watchlistId`) REFERENCES `Watchlist`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -259,13 +267,19 @@ ALTER TABLE `WatchlistSymbol` ADD CONSTRAINT `WatchlistSymbol_watchlistId_fkey` 
 ALTER TABLE `WatchlistSymbol` ADD CONSTRAINT `WatchlistSymbol_symbol_fkey` FOREIGN KEY (`symbol`) REFERENCES `ActiveSymbols`(`symbol`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `AcceptedTransaction` ADD CONSTRAINT `AcceptedTransaction_transactionMethodsId_fkey` FOREIGN KEY (`transactionMethodsId`) REFERENCES `TransactionMethods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `AcceptedTransactionOnTransactionMethod` ADD CONSTRAINT `AcceptedTransactionOnTransactionMethod_acceptedTransactionI_fkey` FOREIGN KEY (`acceptedTransactionId`) REFERENCES `AcceptedTransaction`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `DepositRequest` ADD CONSTRAINT `DepositRequest_transactionMethodId_fkey` FOREIGN KEY (`transactionMethodId`) REFERENCES `TransactionMethods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `AcceptedTransactionOnTransactionMethod` ADD CONSTRAINT `AcceptedTransactionOnTransactionMethod_transactionMethodId_fkey` FOREIGN KEY (`transactionMethodId`) REFERENCES `TransactionMethod`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `WithdrawalRequest` ADD CONSTRAINT `WithdrawalRequest_transactionMethodId_fkey` FOREIGN KEY (`transactionMethodId`) REFERENCES `TransactionMethods`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `TrendingSymbol` ADD CONSTRAINT `TrendingSymbol_symbol_fkey` FOREIGN KEY (`symbol`) REFERENCES `ActiveSymbols`(`symbol`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DepositRequest` ADD CONSTRAINT `DepositRequest_transactionMethodId_fkey` FOREIGN KEY (`transactionMethodId`) REFERENCES `TransactionMethod`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `WithdrawalRequest` ADD CONSTRAINT `WithdrawalRequest_transactionMethodId_fkey` FOREIGN KEY (`transactionMethodId`) REFERENCES `TransactionMethod`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `AuditTrail` ADD CONSTRAINT `AuditTrail_adminId_fkey` FOREIGN KEY (`adminId`) REFERENCES `Admin`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

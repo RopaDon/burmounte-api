@@ -1,14 +1,15 @@
+(global as any).WebSocket = require("ws");
+
 import path from "path";
-import multer from "multer";
 import express from "express";
 import bodyParser from "body-parser";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { container } from "./core/di/dependency-injection";
+import { derivAPI } from "./core/services/deriv-api-connection";
 import { routingControllersToSpec } from "routing-controllers-openapi";
 import AuthorizationMiddleware from "./core/http/middlewares/authorization-middleware";
 import { createExpressServer, getMetadataArgsStorage, useContainer } from "routing-controllers";
-import { DerivAPI } from "./core/services/deriv-api";
 
 async function _bootstrap() {
   const app = _configureExpressServer();
@@ -38,9 +39,8 @@ function _configureExpressServer() {
 async function _configureServices(app: express.Express) {
   const port = process.env.PORT || 5000;
 
-  const derivAPI = new DerivAPI();
-  await derivAPI.establishApiConnection();
-  // Set up the container for routing-controllers
+  derivAPI.connect();
+
   useContainer(container, { fallback: true, fallbackOnErrors: true });
 
   app.use(bodyParser.json({ limit: "50mb" }));

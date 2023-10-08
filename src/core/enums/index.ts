@@ -11,6 +11,11 @@ export enum AuditActions {
   DELETE_MANY = "DELETE_MANY",
 }
 
+export enum ActiveSymbolsQuery {
+  Brief = "brief",
+  Full = "full",
+}
+
 export enum Tables {
   Job = "Job",
   Client = "Client",

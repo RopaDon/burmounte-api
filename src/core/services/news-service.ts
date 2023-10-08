@@ -1,7 +1,9 @@
+import "reflect-metadata";
+
 import { injectable } from "inversify";
 import { NewsArticle } from "../types";
 import { HttpClient } from "../http/client";
-import { snakeToCamelCase } from "../utils";
+import { snakeToCamel } from "../utils";
 
 @injectable()
 export class NewsApi {
@@ -13,7 +15,7 @@ export class NewsApi {
     this.httpClient = new HttpClient(process.env.NEWS_API!, headers);
   }
 
-  async searchNews(query: string, limit: number = 3): Promise<NewsArticle[]> {
+  async searchNews(query: string, limit: number = 10): Promise<NewsArticle[]> {
     try {
       const response = await this.httpClient.get<any>(``, {
         params: {
@@ -21,15 +23,8 @@ export class NewsApi {
           limit,
         },
       });
-      const responseData = response.data.map((item: any) => {
-        const camelCaseItem: any = {};
-        for (const key in item) {
-          if (Object.hasOwnProperty.call(item, key)) {
-            camelCaseItem[snakeToCamelCase(key)] = item[key];
-          }
-        }
-        return camelCaseItem;
-      });
+
+      const responseData = response.data.map(snakeToCamel);
 
       return responseData;
     } catch (error) {

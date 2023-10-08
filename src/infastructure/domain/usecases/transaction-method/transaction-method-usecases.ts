@@ -19,17 +19,22 @@ export default class TransactionMethodsUseCases {
         where: {
           acceptedTransactions: {
             some: {
-              identifier,
+              acceptedTransaction: {
+                identifier, // Filter by the identifier
+              },
             },
           },
         },
-
         include: {
           acceptedTransactions: {
             select: {
-              id: true,
-              name: true,
-              identifier: true,
+              acceptedTransaction: {
+                select: {
+                  id: true,
+                  name: true,
+                  identifier: true,
+                },
+              },
             },
           },
         },
