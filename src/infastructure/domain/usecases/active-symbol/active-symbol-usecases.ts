@@ -14,6 +14,7 @@ import TrendingSymbolsUseCases from "../trending-symbols/trending-symbols-usecas
 import { GetActiveSymbolsDTO } from "../../../../core/http/request/active-symbol/get-active-symbols";
 import { GetActiveSymbolMetadataDTO } from "../../../../core/http/request/active-symbol/get-active-symbol-metadata";
 import { ActiveSymbolsQuery } from "../../../../core/enums";
+import { activeSymbolMarketDescriptions } from "../../../../core/constants";
 
 @injectable()
 export default class ActiveSymbolUseCases {
@@ -24,6 +25,28 @@ export default class ActiveSymbolUseCases {
     @inject(TrendingSymbolsUseCases) private trendingSymbolsUseCases: TrendingSymbolsUseCases
   ) {
     this.logger = new LoggerService(this.constructor.name);
+  }
+
+  public async getReadableNameByDisplayNames(displayNames: string[]) {
+    try {
+      const activeSymbols = await prisma.activeSymbol.findMany({
+        where: {
+          displayName: {
+            in: displayNames,
+          },
+        },
+        select: {
+          symbol: true,
+          displayPhoto: true,
+          readableName: true,
+        },
+      });
+
+      // Return the readable names from the result.
+      return activeSymbols;
+    } catch (error) {
+      throw ServiceHubExceptionDelegate(error, this.logger);
+    }
   }
 
   public async getActiveSymbols(getActiveSymbolsDTO: GetActiveSymbolsDTO) {
@@ -43,6 +66,36 @@ export default class ActiveSymbolUseCases {
       });
 
       return activeSymbols;
+    } catch (error) {
+      throw ServiceHubExceptionDelegate(error, this.logger);
+    }
+  }
+
+  public async getActiveSymbolsForWebLanding() {
+    try {
+      const activeSymbols = await prisma.activeSymbol.findMany();
+
+      // Create an object to store the grouped symbols
+      const groupedSymbols: any = {};
+
+      // Loop through the activeSymbols and group them by marketDisplayName
+      activeSymbols.forEach((symbol) => {
+        const marketDisplayName: any = symbol.marketDisplayName!;
+        if (!groupedSymbols[marketDisplayName]) {
+          groupedSymbols[marketDisplayName] = [];
+        }
+        if (groupedSymbols[marketDisplayName].length < 6) {
+          groupedSymbols[marketDisplayName].push(symbol);
+        }
+      });
+
+      // Convert the groupedSymbols object into an array of objects
+      const result = Object.entries(groupedSymbols).map(([displayName, symbols]) => ({
+        ...{ displayName, description: activeSymbolMarketDescriptions.find((d) => d.name == displayName)?.description },
+        symbols,
+      }));
+
+      return result;
     } catch (error) {
       throw ServiceHubExceptionDelegate(error, this.logger);
     }

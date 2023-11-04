@@ -20,6 +20,7 @@ model ActiveSymbol {
   marketDisplayName       String?
   pip                     Float?
   quotedCurrencySymbol    String?
+  displayPhoto            String?
   spot                    Float?
   spotAge                 String?
   spotTime                String?

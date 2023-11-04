@@ -14,6 +14,7 @@ import { ConfigService } from "../../../../core/services/config-service";
 import ServiceHubExceptionDelegate from "../../../../core/exceptions/handler";
 import ServiceHubException from "../../../../core/exceptions/service-hub-exception";
 import AuthenticateAdminDTO from "../../dtos/request/admin/authenticate-admin-dto";
+import FirebaseUseCases from "../firebase/firebase-usecases";
 
 @injectable()
 export default class AuthUseCases {
@@ -21,7 +22,8 @@ export default class AuthUseCases {
   constructor(
     @inject(DerivService) private derivService: DerivService,
     @inject(ConfigService) private configService: ConfigService,
-    @inject(StripeUseCases) private stripeUseCases: StripeUseCases
+    @inject(StripeUseCases) private stripeUseCases: StripeUseCases,
+    @inject(FirebaseUseCases) private firebaseUseCases: FirebaseUseCases
   ) {
     this.logger = new LoggerService(this.constructor.name);
   }
@@ -34,7 +36,13 @@ export default class AuthUseCases {
       const userSelectQuery = {
         id: true,
         email: true,
+        country: true,
+        fullName: true,
         derivUserId: true,
+        accountType: true,
+        profilePicture: true,
+        accountCategory: true,
+        preferredLanguage: true,
       };
 
       const derivUser = await this.derivService.authorize(derivToken);
@@ -58,6 +66,10 @@ export default class AuthUseCases {
           data,
           select: userSelectQuery,
         })) as User;
+      }
+
+      if (burmounteUser.profilePicture) {
+        burmounteUser.profilePicture = await this.firebaseUseCases.getSignedUrl(burmounteUser.profilePicture!);
       }
 
       const user = {

@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { Controllers } from "..";
 import Routes from "../../routes/routes";
 import { inject, injectable } from "inversify";
-import { Get, JsonController, Param, QueryParam, QueryParams } from "routing-controllers";
+import { Body, Get, JsonController, Param, QueryParam, QueryParams } from "routing-controllers";
 import { GetActiveSymbolsDTO } from "../../../core/http/request/active-symbol/get-active-symbols";
 import ActiveSymbolUseCases from "../../../infastructure/domain/usecases/active-symbol/active-symbol-usecases";
 
@@ -16,7 +16,19 @@ export class ActiveSymbolController {
     return await this.activeSymbolUseCases.getActiveSymbols(getActiveSymbolsDTO);
   }
 
-  @Get(Routes.ActiveSymbols.GetActiveSymbolsForLanding)
+  @Get(Routes.ActiveSymbols.GetReadableNames)
+  async getReadableNameByDisplayNames(@QueryParam("displayNames") displayNames: string) {
+    const names = displayNames.split(",");
+
+    return await this.activeSymbolUseCases.getReadableNameByDisplayNames(names);
+  }
+
+  @Get(Routes.ActiveSymbols.GetActiveSymbolsForWebLanding)
+  async getActiveSymbolsForWebLanding() {
+    return await this.activeSymbolUseCases.getActiveSymbolsForWebLanding();
+  }
+
+  @Get(Routes.ActiveSymbols.GetActiveSymbolsForMobileLanding)
   async getActiveSymbolsForLanding() {
     return await this.activeSymbolUseCases.getActiveSymbolsForLanding();
   }

@@ -23,6 +23,9 @@ import SubscriptionUseCases from "../../infastructure/domain/usecases/subscripti
 import { SusbcriptionController } from "../../presentation/controllers/subscription/subscription-controller";
 import TrendingSymbolsUseCases from "../../infastructure/domain/usecases/trending-symbols/trending-symbols-usecases";
 import DerivService from "../services/deriv-api";
+import UserUseCases from "../../infastructure/domain/usecases/user/user-usecases";
+import { UserController } from "../../presentation/controllers/user/user-controller";
+import FirebaseUseCases from "../../infastructure/domain/usecases/firebase/firebase-usecases";
 
 const container = new Container();
 
@@ -32,6 +35,14 @@ container.bind<EmailService>(EmailService).toSelf();
 
 container.bind<AuthUseCases>(AuthUseCases).toSelf();
 container.bind<AuthController>(AuthController).toSelf();
+
+container.bind<LoggerService>(LoggerService).toSelf().inSingletonScope();
+container.bind<ConfigService>(ConfigService).toSelf().inSingletonScope();
+
+container.bind<FirebaseUseCases>(FirebaseUseCases).toSelf();
+
+container.bind<UserUseCases>(UserUseCases).toSelf();
+container.bind<UserController>(UserController).toSelf();
 
 container.bind<DerivService>(DerivService).toSelf();
 
@@ -45,9 +56,6 @@ container.bind<CurrencyController>(CurrencyController).toSelf();
 
 container.bind<ActiveSymbolUseCases>(ActiveSymbolUseCases).toSelf();
 container.bind<ActiveSymbolController>(ActiveSymbolController).toSelf();
-
-container.bind<LoggerService>(LoggerService).toSelf().inSingletonScope();
-container.bind<ConfigService>(ConfigService).toSelf().inSingletonScope();
 
 container.bind<NotificationUseCases>(NotificationUseCases).toSelf();
 container.bind<NotificationController>(NotificationController).toSelf();
