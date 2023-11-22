@@ -148,7 +148,6 @@ export default class ActiveSymbolUseCases {
   }
 
   public async getActiveSymbolBySymbol(symbol: string): Promise<ActiveSymbol | null> {
-    console.log(symbol);
     try {
       let result = await prisma.activeSymbol.findFirst({
         where: {
