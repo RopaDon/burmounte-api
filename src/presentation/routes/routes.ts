@@ -7,6 +7,7 @@ export default class Routes {
     GetTrendingSymbols: "/trending",
     GetActiveSymbolsForWebLanding: "/landing/web",
     GetActiveSymbolsForMobileLanding: "/landing/mobile",
+    GetTradableMarkets: "/tradedable",
   };
   static Currencies = {
     Get: "",

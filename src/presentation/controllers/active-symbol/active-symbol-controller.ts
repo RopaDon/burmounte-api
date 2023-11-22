@@ -11,6 +11,11 @@ import ActiveSymbolUseCases from "../../../infastructure/domain/usecases/active-
 export class ActiveSymbolController {
   constructor(@inject(ActiveSymbolUseCases) private activeSymbolUseCases: ActiveSymbolUseCases) {}
 
+  @Get(Routes.ActiveSymbols.Search)
+  async search(@QueryParam("term") term: string) {
+    return await this.activeSymbolUseCases.search(term);
+  }
+
   @Get(Routes.ActiveSymbols.GetActiveSymbols)
   async getActiveSymbols(@QueryParams() getActiveSymbolsDTO: GetActiveSymbolsDTO) {
     return await this.activeSymbolUseCases.getActiveSymbols(getActiveSymbolsDTO);
@@ -32,19 +37,18 @@ export class ActiveSymbolController {
   async getActiveSymbolsForLanding() {
     return await this.activeSymbolUseCases.getActiveSymbolsForLanding();
   }
-
-  @Get(Routes.ActiveSymbols.GetActiveSymbol)
-  async getActiveSymbolMetadata(@Param("symbol") symbol: string) {
-    return await this.activeSymbolUseCases.getActiveSymbolBySymbol(symbol);
-  }
-
-  @Get(Routes.ActiveSymbols.Search)
-  async search(@QueryParam("term") term: string) {
-    return await this.activeSymbolUseCases.search(term);
+  @Get(Routes.ActiveSymbols.GetTradableMarkets)
+  async getMobileTradedableMarkets() {
+    return await this.activeSymbolUseCases.getMobileTradedableMarkets();
   }
 
   @Get(Routes.ActiveSymbols.GetTrendingSymbols)
   async getTrendingSymbols() {
     return await this.activeSymbolUseCases.getTrendingSymbols();
+  }
+
+  @Get(Routes.ActiveSymbols.GetActiveSymbol)
+  async getActiveSymbolMetadata(@Param("symbol") symbol: string) {
+    return await this.activeSymbolUseCases.getActiveSymbolBySymbol(symbol);
   }
 }

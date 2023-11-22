@@ -172,19 +172,43 @@ export default class ActiveSymbolUseCases {
     }
   }
 
+  public async getMobileTradedableMarkets(): Promise<ActiveSymbol[]> {
+    try {
+      let results = await prisma.activeSymbol.findMany({
+        where: {
+          market: {
+            in: ["cryptocurrency", "forex", "synthetic_index"],
+          },
+        },
+      });
+
+      return results;
+    } catch (error) {
+      throw ServiceHubExceptionDelegate(error, this.logger);
+    }
+  }
   public async search(searchTerm: string): Promise<ActiveSymbol[]> {
     try {
       let results = await prisma.activeSymbol.findMany({
         where: {
-          OR: [
+          AND: [
             {
-              symbol: {
-                contains: searchTerm,
-              },
+              OR: [
+                {
+                  symbol: {
+                    contains: searchTerm,
+                  },
+                },
+                {
+                  readableName: {
+                    contains: searchTerm,
+                  },
+                },
+              ],
             },
             {
-              readableName: {
-                contains: searchTerm,
+              market: {
+                in: ["cryptocurrency", "forex", "synthetic_index"],
               },
             },
           ],

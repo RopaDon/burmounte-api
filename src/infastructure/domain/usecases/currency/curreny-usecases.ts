@@ -15,8 +15,8 @@ export default class CurrencyUseCases {
 
       // Create a separate "markets" array with specific values and display names
       const markets = [
-        { value: "forex", displayName: "Flat" },
-        { value: "cryptocurrency", displayName: "Crypto" },
+        { value: "Forex", displayName: "Flat" },
+        { value: "Cryptocurrency", displayName: "Crypto" },
       ];
 
       // Group currencies by market
